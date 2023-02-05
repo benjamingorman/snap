@@ -12,29 +12,31 @@ class CardValue(Enum):
     """
     Represents the value of a playing card.
     """
-    ACE = 'A'
-    TWO = '2'
-    THREE = '3'
-    FOUR = '4'
-    FIVE = '5'
-    SIX = '6'
-    SEVEN = '7'
-    EIGHT = '8'
-    NINE = '9'
-    TEN = '10'
-    JACK = 'J'
-    QUEEN = 'Q'
-    KING = 'K'
+
+    ACE = "A"
+    TWO = "2"
+    THREE = "3"
+    FOUR = "4"
+    FIVE = "5"
+    SIX = "6"
+    SEVEN = "7"
+    EIGHT = "8"
+    NINE = "9"
+    TEN = "10"
+    JACK = "J"
+    QUEEN = "Q"
+    KING = "K"
 
 
 class CardSuit(Enum):
     """
     Represents the suit of a playing card.
     """
-    CLUB = '♧'
-    HEART = '♡'
-    SPADE = '♤'
-    DIAMOND = '♢'
+
+    CLUB = "♧"
+    HEART = "♡"
+    SPADE = "♤"
+    DIAMOND = "♢"
 
 
 @dataclass
@@ -42,6 +44,7 @@ class Card:
     """
     Represents a single card, consisting of a suit and a value.
     """
+
     value: CardValue
     suit: CardSuit
 
@@ -54,6 +57,7 @@ class CardStack:
     Represents a collection of cards in some order.
     This could be a full deck of cards, just a few, or an empty set.
     """
+
     def __init__(self, cards: List[Card] = None):
         self._cards = cards or []
 
@@ -63,7 +67,7 @@ class CardStack:
 
     def peek(self) -> Card:
         """Show the top card."""
-        if not len(self):
+        if not self._cards:
             return None
         return self._cards[-1]
 
@@ -91,11 +95,9 @@ class CardStack:
     @staticmethod
     def new_full_deck():
         """Create a CardStack containing one of each possible playing card."""
-        return CardStack([
-            Card(value=value, suit=suit)
-            for suit in CardSuit
-            for value in CardValue
-        ])
+        return CardStack(
+            [Card(value=value, suit=suit) for suit in CardSuit for value in CardValue]
+        )
 
 
 def find_pair(player_cards: dict[int, Card]) -> List[int]:
@@ -107,9 +109,11 @@ def find_pair(player_cards: dict[int, Card]) -> List[int]:
     # maps card value to the indice(s) in the stack at which that card value occurs.
     value_to_indices = defaultdict(list)
 
-    for (i, card) in player_cards.items():
+    for i, card in player_cards.items():
         value_to_indices[card.value].append(i)
 
-    for (_, indices) in value_to_indices.items():
+    for _, indices in value_to_indices.items():
         if len(indices) > 1:  # At least two cards have the same value.
             return indices[:2]  # Only return the first pair found.
+
+    return None

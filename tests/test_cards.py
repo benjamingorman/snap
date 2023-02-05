@@ -1,3 +1,6 @@
+"""
+Tests for snap.cards
+"""
 import unittest
 import copy
 from snap.cards import CardValue, CardSuit, Card, CardStack, find_pair
@@ -33,9 +36,9 @@ class TestCardStack(unittest.TestCase):
         Shuffle should change the order of the deck.
         """
         cards = CardStack.new_full_deck()
-        order1 = copy.deepcopy(cards._cards)
+        order1 = copy.deepcopy(cards._cards)  # pylint: disable=protected-access
         cards.shuffle()
-        order2 = cards._cards
+        order2 = cards._cards  # pylint: disable=protected-access
         self.assertNotEqual(order1, order2)
 
 
@@ -63,8 +66,6 @@ class TestCardsHelpers(unittest.TestCase):
             1: Card(value=CardValue.THREE, suit=CardSuit.SPADE),
         }
         self.assertEqual(find_pair(cards), None)
-
-
 
 
 if __name__ == "__main__":

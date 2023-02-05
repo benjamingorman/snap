@@ -30,6 +30,16 @@ To run the unit-tests:
 $ python3 -m unittest discover
 ```
 
+I've used [black](https://pypi.org/project/black/) to format the code.
+```
+$ black .
+```
+
+I've used [pylint](https://pypi.org/project/pylint/) to lint the code.
+```
+$ pylint snap tests
+```
+
 ## Notes:
 
 On each turn the game will print lines like this:

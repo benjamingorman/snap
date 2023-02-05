@@ -1,7 +1,15 @@
+"""
+Tests for snap.player
+"""
 import unittest
 from queue import SimpleQueue
 
-from snap.player import PlayerMessage, PlayerMessageType, ServerMessage, ServerMessageType
+from snap.player import (
+    PlayerMessage,
+    PlayerMessageType,
+    ServerMessage,
+    ServerMessageType,
+)
 from snap.cards import CardStack
 from tests.utils import ConsistentSnapPlayer, ConsistentNoSnapPlayer
 
@@ -17,11 +25,15 @@ class TestPlayer(unittest.TestCase):
         """
         snap_queue = SimpleQueue()
         player = ConsistentSnapPlayer(1, snap_queue)
-        player.turn_queue.put(ServerMessage(message_type=ServerMessageType.TURN, cards=CardStack()))
+        player.turn_queue.put(
+            ServerMessage(message_type=ServerMessageType.TURN, cards=CardStack())
+        )
         player.turn_queue.put(ServerMessage(message_type=ServerMessageType.END_GAME))
         player.run()
         response = snap_queue.get_nowait()
-        self.assertEqual(response, PlayerMessage(player_id=1, message_type=PlayerMessageType.SNAP))
+        self.assertEqual(
+            response, PlayerMessage(player_id=1, message_type=PlayerMessageType.SNAP)
+        )
 
     def test_no_snap_called(self):
         """
@@ -29,11 +41,15 @@ class TestPlayer(unittest.TestCase):
         """
         snap_queue = SimpleQueue()
         player = ConsistentNoSnapPlayer(1, snap_queue)
-        player.turn_queue.put(ServerMessage(message_type=ServerMessageType.TURN, cards=CardStack()))
+        player.turn_queue.put(
+            ServerMessage(message_type=ServerMessageType.TURN, cards=CardStack())
+        )
         player.turn_queue.put(ServerMessage(message_type=ServerMessageType.END_GAME))
         player.run()
         response = snap_queue.get_nowait()
-        self.assertEqual(response, PlayerMessage(player_id=1, message_type=PlayerMessageType.NO_SNAP))
+        self.assertEqual(
+            response, PlayerMessage(player_id=1, message_type=PlayerMessageType.NO_SNAP)
+        )
 
 
 if __name__ == "__main__":

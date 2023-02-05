@@ -1,9 +1,11 @@
+"""
+Tests for snap.simulator
+"""
 import unittest
 
-from snap.simulator import SnapSimulator, find_pair
+from snap.simulator import SnapSimulator
 from snap.cards import CardStack, Card, CardSuit, CardValue
-from snap.player import PlayerMessage, PlayerMessageType, ServerMessage, ServerMessageType
-from tests.utils import ConsistentSnapPlayer, ConsistentNoSnapPlayer
+from tests.utils import ConsistentSnapPlayer
 
 
 class TestSnapSimulator(unittest.TestCase):
@@ -48,19 +50,25 @@ class TestSnapSimulator(unittest.TestCase):
         the correct cards.
         """
         sim = SnapSimulator()
-        down_pile0 = CardStack([
-            Card(value=CardValue.ACE, suit=CardSuit.HEART),
-            Card(value=CardValue.ACE, suit=CardSuit.DIAMOND),
-        ])
-        down_pile1 = CardStack([
-            Card(value=CardValue.ACE, suit=CardSuit.SPADE),
-            Card(value=CardValue.ACE, suit=CardSuit.CLUB),
-        ])
+        down_pile0 = CardStack(
+            [
+                Card(value=CardValue.ACE, suit=CardSuit.HEART),
+                Card(value=CardValue.ACE, suit=CardSuit.DIAMOND),
+            ]
+        )
+        down_pile1 = CardStack(
+            [
+                Card(value=CardValue.ACE, suit=CardSuit.SPADE),
+                Card(value=CardValue.ACE, suit=CardSuit.CLUB),
+            ]
+        )
 
         up_pile0 = CardStack()
-        up_pile1 = CardStack([
-            Card(value=CardValue.TWO, suit=CardSuit.SPADE),
-        ])
+        up_pile1 = CardStack(
+            [
+                Card(value=CardValue.TWO, suit=CardSuit.SPADE),
+            ]
+        )
         sim.player_card_down_piles = [down_pile0, down_pile1]
         sim.player_card_up_piles = [up_pile0, up_pile1]
         sim.players = [ConsistentSnapPlayer(0, None), ConsistentSnapPlayer(0, None)]
@@ -106,7 +114,11 @@ class TestSnapSimulator(unittest.TestCase):
         Test that resolve_snap_decision punishes the calling player if no snap exists.
         """
         sim = SnapSimulator()
-        sim.players = [ConsistentSnapPlayer(0, None), ConsistentSnapPlayer(1, None), ConsistentSnapPlayer(2, None)]
+        sim.players = [
+            ConsistentSnapPlayer(0, None),
+            ConsistentSnapPlayer(1, None),
+            ConsistentSnapPlayer(2, None),
+        ]
         cards = {
             0: Card(value=CardValue.TWO, suit=CardSuit.HEART),
             1: Card(value=CardValue.THREE, suit=CardSuit.CLUB),
@@ -120,7 +132,7 @@ class TestSnapSimulator(unittest.TestCase):
         sim.player_card_down_piles = [
             CardStack(),
             CardStack(),
-            CardStack([Card(value=CardValue.ACE, suit=CardSuit.SPADE)])
+            CardStack([Card(value=CardValue.ACE, suit=CardSuit.SPADE)]),
         ]
         sim.resolve_snap_decision(cards, 2)
 
@@ -131,7 +143,9 @@ class TestSnapSimulator(unittest.TestCase):
 
         # It should remove 1 card from player 2's down pile and give to another player.
         self.assertEqual(len(sim.player_card_down_piles[2]), 0)
-        self.assertEqual(len(sim.player_card_down_piles[0]) + len(sim.player_card_down_piles[1]), 1)
+        self.assertEqual(
+            len(sim.player_card_down_piles[0]) + len(sim.player_card_down_piles[1]), 1
+        )
 
 
 if __name__ == "__main__":
