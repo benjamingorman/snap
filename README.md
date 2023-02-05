@@ -48,8 +48,8 @@ On each turn the game will print lines like this:
 Turn 3: (Player 0) 3♤ 7♢  |  Up: 1, 1  |  Down: 25, 25
 ```
 
-This indicates that it is turn 3 and it is player 0's turn to play. There is 1 card in the 'up' pile for
-each player respectively. There are 25 cards in the 'pile' for each player respectively.
+This indicates that it is turn 3 and it is player 0's turn to play. There is 1 card in the up pile for
+each player respectively. There are 25 cards in the down pile for each player respectively.
 
 * The game ends with a win if only 1 player has cards in his down pile at the end of a turn.
 * The game ends in a draw if no players have cards in their down piles at the end of a turn.
