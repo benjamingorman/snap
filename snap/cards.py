@@ -103,17 +103,18 @@ class CardStack:
 def find_pair(player_cards: dict[int, Card]) -> List[int]:
     """
     Checks whether the cards for the given players contain a pair.
-    If so, returns the 2 indices of the first pair found.
+    Takes a dict mapping player ID to card.
+    If a pair was found, returns the 2 player IDs who have matching cards.
     If no pair was found, returns None.
     """
-    # maps card value to the indice(s) in the stack at which that card value occurs.
-    value_to_indices = defaultdict(list)
+    # maps card value to player id
+    value_to_player_id = defaultdict(list)
 
     for i, card in player_cards.items():
-        value_to_indices[card.value].append(i)
+        value_to_player_id[card.value].append(i)
 
-    for _, indices in value_to_indices.items():
-        if len(indices) > 1:  # At least two cards have the same value.
-            return indices[:2]  # Only return the first pair found.
+    for _, pids in value_to_player_id.items():
+        if len(pids) > 1:  # At least two cards have the same value.
+            return pids[:2]  # Only return the first pair found.
 
     return None
