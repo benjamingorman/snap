@@ -163,10 +163,7 @@ class ComputerPlayer(Player):
                 return False
             return True
 
-        if random.random() < self.mistake_chance:
-            return True  # incorrectly call snap
-
-        return False
+        return random.random() < self.mistake_chance  # incorrectly call snap
 
 
 class HumanPlayer(Player):

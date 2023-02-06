@@ -104,11 +104,10 @@ class SnapSimulator:
     def play_turn(self):
         """
         Play a single turn in the game.
-        One card will be removed from every player's face down pile.
+        One card will be turned over from the next player's face down pile.
         The players will then be given the opportunity to say SNAP.
         If someone correctly called snap then cards will be updated.
         """
-        # Remove a card from each player's face down pile
         cards = self.turn_over_new_card()
         responses = self.gather_responses(cards)
         self.process_responses(cards, responses)
