@@ -46,7 +46,7 @@ class TestSnapSimulator(unittest.TestCase):
 
     def test_turn_over_new_cards(self):
         """
-        Test that turn_over_new_cards takes a card from each down pile and returns
+        Test that turn_over_new_cards takes a card from one down pile and returns
         the correct cards.
         """
         sim = SnapSimulator()
@@ -78,8 +78,8 @@ class TestSnapSimulator(unittest.TestCase):
         self.assertEqual(len(down_pile0), 1)
 
         # The right cards should be returned
+        self.assertEqual(len(cards), 1)
         self.assertEqual(cards[0], Card(value=CardValue.ACE, suit=CardSuit.DIAMOND))
-        self.assertEqual(cards[1], Card(value=CardValue.TWO, suit=CardSuit.SPADE))
 
     def test_resolve_snap_decision_when_snap_exists(self):
         """

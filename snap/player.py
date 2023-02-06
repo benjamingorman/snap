@@ -85,6 +85,9 @@ class Player(ABC):
         # Changed to false when the player is out of the game.
         self.still_in_game = True
 
+        # The thread that will run the game loop for this player.
+        self.thread = None
+
     def run(self):
         """
         The game loop for this player, which will be the target of a threading.Thread instance.

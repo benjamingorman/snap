@@ -1,7 +1,7 @@
 """
 Simulator for the game of Snap.
 """
-from typing import List
+from typing import List, Tuple
 import logging
 import time
 import threading
@@ -44,8 +44,8 @@ class SnapSimulator:
         self.turn_count = 0
         self.config = SnapGameConfig()
         self.players: Player = []
-        self.threads = []
         self.snap_queue = SimpleQueue()
+        self.cards_drawn: List[Tuple[int, Card]] = []
         self.player_card_up_piles: List[CardStack] = []
         self.player_card_down_piles: List[CardStack] = []
 
@@ -117,41 +117,48 @@ class SnapSimulator:
         print()
         time.sleep(self.config.turn_delay)
 
+    def get_player_id_to_play_next(self) -> int:
+        """
+        Return the ID of the player who's turn it is to play next.
+        """
+        players_still_in = self.players_still_in_game()
+        player_to_play_next = players_still_in[self.turn_count % len(players_still_in)]
+        return player_to_play_next.player_id
+
     def turn_over_new_card(self) -> dict[int, Card]:
         """
-        Turn over a new card from one player's down pile.
-        Returns a dict mapping player ID to the top card for that player.
+        Turn over a new card from one player's down pile on their turn.
+        Returns this card plus the previous card that was turned over (if any)
+        in the form of a dict mapping player ID to card.
         Excludes the players who are out of the game.
         Prints a message informing the user about all top cards from each player.
         """
-        players_still_in = [player for player in self.players if player.still_in_game]
-        player_whose_turn_it_is = players_still_in[
-            self.turn_count % len(players_still_in)
-        ]
+        next_player_id = self.get_player_id_to_play_next()
+        # Draw a card from their down pile
+        card = self.player_card_down_piles[next_player_id].pop()
+        # Add it to their up pile
+        self.player_card_up_piles[next_player_id].push(card)
+        # Record the card drawn (communicate this to each player later)
+        self.cards_drawn.append((next_player_id, card))
+        self.print_turn_info_message()
+        return dict(self.cards_drawn[-2:])
 
-        cards = {}
-        cards_message = []
-        for i, pile in enumerate(self.player_card_up_piles):
-            if i == player_whose_turn_it_is.player_id:
-                card = self.player_card_down_piles[i].pop()
-                pile.push(card)
-
-            if len(pile):
-                cards[i] = pile.peek()
-                cards_message.append(str(cards[i]))
-            else:
-                cards_message.append("_")
-
+    def print_turn_info_message(self):
+        """
+        Print a message to the terminal informing the user about the state of the current turn.
+        """
+        cards_message = " ".join(
+            str(pile.peek()) if pile else "_" for pile in self.player_card_up_piles
+        )
         print(
             "Turn {}: (Player {}) {}  |  Up: {}  |  Down: {}".format(  # pylint: disable=consider-using-f-string
                 self.turn_count + 1,
-                player_whose_turn_it_is.player_id,
-                " ".join(cards_message),
+                self.get_player_id_to_play_next(),
+                cards_message,
                 ", ".join([str(len(stack)) for stack in self.player_card_up_piles]),
                 ", ".join([str(len(stack)) for stack in self.player_card_down_piles]),
             )
         )
-        return cards
 
     def gather_responses(self, cards: dict[int, Card]) -> List[PlayerMessage]:
         """
@@ -166,9 +173,7 @@ class SnapSimulator:
             )
 
         # Wait for a response from all players still in the game (SNAP or NO_SNAP)
-        while len(responses) < len(
-            [player for player in self.players if player.still_in_game]
-        ):
+        while len(responses) < len(self.players_still_in_game()):
             response = self.snap_queue.get(block=True)
             if response.message_type == PlayerMessageType.SNAP:
                 print(f"Player {response.player_id}: SNAP!")
@@ -215,6 +220,9 @@ class SnapSimulator:
         # Give the victory cards to the player who called snap.
         self.player_card_down_piles[player_id] += victory_cards
 
+        # Reset the 'cards_drawn' list since we're starting a new hand.
+        self.cards_drawn = []
+
     def resolve_snap_decision_incorrect(self, player_id: int):
         """
         Resolve an incorrect snap decision.
@@ -226,7 +234,7 @@ class SnapSimulator:
             return
         card = self.player_card_down_piles[player_id].pop()
         other_players_still_in = set(
-            player.player_id for player in self.players if player.still_in_game
+            player.player_id for player in self.players_still_in_game()
         ) - set([player_id])
         player_to_receive_card = random.choice(list(other_players_still_in))
         self.player_card_down_piles[player_to_receive_card].push(card)
@@ -254,8 +262,8 @@ class SnapSimulator:
         """
         self.turn_count = 1
         self.players = []
-        self.threads = []
         self.snap_queue = SimpleQueue()
+        self.cards_drawn = []
         self.player_card_up_piles = []
         self.player_card_down_piles = []
 
@@ -268,10 +276,9 @@ class SnapSimulator:
                 if self.config.fast_ai:
                     player.reaction_time_min = 0.0
                     player.reaction_time_max = 0.001
-            thread = threading.Thread(daemon=True, target=player.run)
-            thread.start()
+            player.thread = threading.Thread(daemon=True, target=player.run)
+            player.thread.start()
             self.players.append(player)
-            self.threads.append(thread)
 
         logging.info("Shuffling the deck...")
         dealer_cards = sum(
@@ -296,6 +303,12 @@ class SnapSimulator:
         for i, stack in enumerate(self.player_card_down_piles):
             logging.debug("Player %d cards: %s", i, stack)
 
+    def players_still_in_game(self) -> List[Player]:
+        """
+        Return a list of all the players still in the game.
+        """
+        return [player for player in self.players if player.still_in_game]
+
     def cleanup_workers(self):
         """
         Ensure all player worker threads have finished properly.
@@ -304,6 +317,4 @@ class SnapSimulator:
             player.turn_queue.put(
                 ServerMessage(message_type=ServerMessageType.END_GAME)
             )
-
-        for thread in self.threads:
-            thread.join()
+            player.thread.join()
