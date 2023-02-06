@@ -113,12 +113,12 @@ class SnapSimulator:
         self.process_responses(cards, responses)
         self.mark_players_out()
         self.turn_count += 1
-        print()
+        print()  # make the output a little easier to read
         time.sleep(self.config.turn_delay)
 
     def get_player_id_to_play_next(self) -> int:
         """
-        Return the ID of the player who's turn it is to play next.
+        Return the ID of the player whose turn it is to play next.
         """
         players_still_in = self.players_still_in_game()
         player_to_play_next = players_still_in[self.turn_count % len(players_still_in)]
